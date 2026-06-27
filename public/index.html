@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Notes App</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- =============================================
+    DECOY UI — looks like a normal notes app
+    The real SOS trigger runs silently in trigger.js
+    Phase 2: SOS overlay now shows GPS status too
+  ============================================== -->
+
+  <div class="app">
+    <header class="app-header">
+      <h1>My Notes</h1>
+      <span class="date" id="date-display"></span>
+    </header>
+
+    <main class="note-area">
+      <textarea
+        id="note-input"
+        placeholder="Write your notes here..."
+      ></textarea>
+      <button class="save-btn" onclick="saveNote()">Save Note</button>
+      <p class="saved-msg" id="saved-msg"></p>
+    </main>
+  </div>
+
+  <!-- SOS confirmation overlay -->
+  <div class="sos-overlay" id="sos-overlay">
+    <div class="sos-card">
+      <div class="sos-icon">🆘</div>
+      <h2>SOS Triggered!</h2>
+      <p id="sos-status">Getting your location and sending alert...</p>
+      <button class="dismiss-btn" onclick="dismissOverlay()">OK</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/trigger.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

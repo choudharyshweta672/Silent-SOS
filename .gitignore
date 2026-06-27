@@ -1,0 +1,16 @@
+# =============================================
+#   .gitignore — files to NEVER push to GitHub
+# =============================================
+
+# Secret credentials — NEVER commit this
+config/.env
+
+# Node modules — huge folder, not needed on GitHub
+node_modules/
+
+# Mac junk
+.DS_Store
+
+# Editor files
+.vscode/
+*.log

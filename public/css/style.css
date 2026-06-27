@@ -1,0 +1,145 @@
+/* =============================================
+   silent-sos / public / css / style.css
+   Decoy UI — looks like a normal notes app
+============================================= */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f5f5f0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
+  color: #1a1a1a;
+}
+
+/* ---- App container ---- */
+.app {
+  width: 100%;
+  max-width: 600px;
+}
+
+/* ---- Header ---- */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.app-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.date {
+  font-size: 13px;
+  color: #888;
+}
+
+/* ---- Note textarea ---- */
+.note-area {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+#note-input {
+  width: 100%;
+  min-height: 300px;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  line-height: 1.7;
+  resize: vertical;
+  color: #1a1a1a;
+  font-family: inherit;
+  background: transparent;
+}
+
+/* ---- Save button ---- */
+.save-btn {
+  margin-top: 16px;
+  padding: 10px 24px;
+  background: #1a1a1a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.save-btn:hover {
+  background: #333;
+}
+
+/* ---- Saved confirmation ---- */
+.saved-msg {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #22a06b;
+  min-height: 18px;
+}
+
+/* ---- SOS overlay (shown after trigger fires) ---- */
+.sos-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 999;
+  justify-content: center;
+  align-items: center;
+}
+
+.sos-overlay.show {
+  display: flex;
+}
+
+.sos-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 28px;
+  max-width: 340px;
+  width: 90%;
+  text-align: center;
+}
+
+.sos-card .sos-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.sos-card h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #d32f2f;
+}
+
+.sos-card p {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.sos-card .dismiss-btn {
+  padding: 10px 28px;
+  background: #d32f2f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}

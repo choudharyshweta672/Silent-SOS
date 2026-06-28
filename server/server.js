@@ -131,8 +131,8 @@ app.post("/send-sos", async (req, res) => {
       message, timestamp, lat, lng, mapsUrl
     );
 
-    console.log("[SOS] Email sent! ID:", result.messageId);
-
+    // console.log("[SOS] Email sent! ID:", result.messageId);
+console.log("[SOS] Resend response:", JSON.stringify(result));
     res.json({
       success:  true,
       message:  "SOS email sent!",

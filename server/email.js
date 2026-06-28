@@ -62,8 +62,8 @@ async function sendEmail(message, timestamp, lat, lng, mapsUrl) {
     (lat ? `📍 Location: ${mapsUrl}\n` : `📍 Location: unavailable\n`) +
     `🕐 Time: ${timestamp}\n`;
  
-  // Send the email
-  const result = await transporter.sendMail({
+   //Send the email
+ const result = await transporter.sendMail({
     from:    `"Silent SOS" <${gmailUser}>`,
     to:      alertEmail,
     subject: `🆘 SOS ALERT — ${timestamp}`,

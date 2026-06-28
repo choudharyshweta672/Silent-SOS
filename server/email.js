@@ -4,76 +4,41 @@
 //   Sends SOS email when trigger fires
 // =============================================
  
-const nodemailer = require("nodemailer");
- 
-// Load from .env
-const gmailUser  = process.env.GMAIL_USER;
-const gmailPass  = process.env.GMAIL_PASS;
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
 const alertEmail = process.env.ALERT_EMAIL;
- 
-// Validate credentials
-if (!gmailUser || !gmailPass || !alertEmail) {
-  console.error("[Email] ERROR: Missing GMAIL_USER, GMAIL_PASS or ALERT_EMAIL in .env!");
+if (!process.env.RESEND_API_KEY || !alertEmail) {
+  console.error("[Email] ERROR: Missing RESEND_API_KEY or ALERT_EMAIL!");
   process.exit(1);
 }
- 
-// Create Gmail transporter
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: gmailUser,
-    pass: gmailPass    // App Password from Google account
-  }
-});
- 
- 
-// =============================================
-//   sendEmail(message, timestamp, lat, lng, mapsUrl)
-//   Sends a formatted SOS email
-// =============================================
 async function sendEmail(message, timestamp, lat, lng, mapsUrl) {
- 
-  // Build location section
   const locationPart = lat
-    ? `<p>📍 <strong>Location:</strong> <a href="${mapsUrl}">${mapsUrl}</a><br/>(${lat.toFixed(5)}, ${lng.toFixed(5)})</p>`
-    : `<p>📍 <strong>Location:</strong> unavailable</p>`;
- 
-  // HTML email body — looks great on phone
+    ? `<p>📍 <strong>My location:</strong> <a href="${mapsUrl}">${mapsUrl}</a></p>`
+    : `<p>📍 <strong>My location:</strong> unavailable</p>`;
   const htmlBody = `
     <div style="font-family:sans-serif;max-width:500px;margin:0 auto;border:2px solid #d32f2f;border-radius:12px;overflow:hidden">
       <div style="background:#d32f2f;padding:20px;text-align:center">
-        <h1 style="color:white;margin:0;font-size:24px">🆘 SILENT SOS ALERT</h1>
+        <h1 style="color:white;margin:0">🆘 EMERGENCY SOS</h1>
       </div>
-      <div style="padding:20px;background:#fff">
-        <p style="font-size:16px;color:#333">${message}</p>
+      <div style="padding:24px;background:#fff">
+        <div style="background:#fff3f3;border-left:4px solid #d32f2f;padding:14px;border-radius:4px;margin-bottom:16px">
+          <p style="margin:0;font-size:18px;font-weight:bold;color:#d32f2f">⚠️ Please check on me immediately!</p>
+          <p style="margin:6px 0 0;font-size:14px;color:#555">I may be in danger. Please call me or come to my location right now.</p>
+        </div>
+        <p style="font-size:15px;color:#333">${message}</p>
         ${locationPart}
-        <p>🕐 <strong>Time:</strong> ${timestamp}</p>
-        <hr style="border:0.5px solid #eee"/>
-        <p style="font-size:12px;color:#999">Sent by Silent SOS app.</p>
+        <p style="font-size:13px;color:#666">🕐 Time: ${timestamp}</p>
+        <div style="text-align:center;margin-top:20px">
+          <a href="${mapsUrl || '#'}" style="background:#d32f2f;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold">📍 Open My Location in Maps</a>
+        </div>
       </div>
-    </div>
-  `;
- 
-  // Plain text fallback
-  const textBody =
-    `🆘 SILENT SOS ALERT\n` +
-    `──────────────────\n` +
-    `${message}\n\n` +
-    (lat ? `📍 Location: ${mapsUrl}\n` : `📍 Location: unavailable\n`) +
-    `🕐 Time: ${timestamp}\n`;
- 
-   //Send the email
- const result = await transporter.sendMail({
-    from:    `"Silent SOS" <${gmailUser}>`,
+    </div>`;
+  const result = await resend.emails.send({
+    from:    "Silent SOS <onboarding@resend.dev>",
     to:      alertEmail,
-    subject: `🆘 SOS ALERT — ${timestamp}`,
-    text:    textBody,
+    subject: `🆘 URGENT: SOS Alert — Please check on me! (${timestamp})`,
     html:    htmlBody
   });
- 
   return result;
 }
- 
- 
 module.exports = { sendEmail };
- 

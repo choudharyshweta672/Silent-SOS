@@ -1,12 +1,10 @@
 # 🆘 Silent SOS — Hidden Emergency Trigger System
 
-> A safety-tech web app that lets users secretly trigger an emergency alert without alerting an attacker. Works on both laptop and mobile.
+> A safety-tech web app that lets users secretly trigger an emergency SMS alert without alerting an attacker. Built with vanilla JavaScript + Node.js + Twilio.
 
-![Phase](https://img.shields.io/badge/Phase-2%20Complete-brightgreen)
-![Stack](https://img.shields.io/badge/Stack-HTML%20%7C%20JS%20%7C%20Node.js%20%7C%20Resend-blue)
-![Live](https://img.shields.io/badge/Live-Deployed-success)
-
-🔗 **Live Demo:** https://silent-sos-0tfn.onrender.com
+![Phase](https://img.shields.io/badge/Phase-1%20Complete-brightgreen)
+![Stack](https://img.shields.io/badge/Stack-HTML%20%7C%20JS%20%7C%20Node.js%20%7C%20Twilio-blue)
+![Status](https://img.shields.io/badge/Status-Active-success)
 
 ---
 
@@ -18,124 +16,107 @@ In dangerous situations — domestic violence, robbery, assault — victims cann
 
 ---
 
-## What It Does
+## Phase 1 — What It Does
 
-**On laptop:** Press spacebar 3 times within 2 seconds → SOS fires  
-**On mobile:** Tap the top-left corner 3 times fast → SOS fires
+Press a secret key combination **3 times within 2 seconds** → an emergency SMS fires automatically to a trusted contact with a distress message.
 
-When triggered, the system:
-- 📍 Grabs live GPS coordinates instantly
-- 🗺️ Builds a Google Maps link to your exact location
-- 📧 Sends a formatted emergency email to your trusted contact
-- 🎭 Shows a decoy notes app — attacker sees nothing suspicious
+- No visible button to press
+- No screen change that alerts an attacker
+- Fires silently in the background
+- Works on any browser (mobile + desktop)
 
 ---
 
 ## Demo
-User presses spacebar ×3 (laptop) or taps corner ×3 (mobile)
 
-↓
+```
+User presses: [Space] [Space] [Space]  ← within 2 seconds
+                        ↓
+         SOS engine detects trigger
+                        ↓
+         POST /send-sos → Node.js server
+                        ↓
+         Twilio API → SMS fired to trusted contact
+                        ↓
+  "EMERGENCY: SOS triggered. Check on me immediately."
+```
 
-SOS engine detects trigger
-
-↓
-
-GPS coordinates captured
-
-↓
-
-POST /send-sos → Node.js server
-
-↓
-
-Resend API → emergency email fired
-
-↓
-
-"🆘 URGENT: SOS Alert — Please check on me!"
-
-Google Maps link to exact location
- 
- ---
+---
 
 ## Tech Stack
 
 | Layer | Technology | Why |
 |---|---|---|
 | Frontend | HTML + Vanilla JS | Lightweight, runs on any device |
-| Trigger (laptop) | keydown + Date.now() | No library needed |
-| Trigger (mobile) | touchstart events | Works on all phones |
-| GPS | Geolocation API | Built into every browser |
+| Trigger logic | JavaScript (addEventListener + Date.now) | No library needed |
 | Backend | Node.js + Express | Simple REST API |
-| Email | Resend API | Works on free hosting, no SMTP blocking |
-| Hosting | Render.com | Free HTTPS, auto-deploy from GitHub |
+| SMS | Twilio API | Reliable, free trial available |
 
 ---
 
-## How The Trigger Works
+## How It Works — The Trigger Logic
 
-**Laptop — keyboard trigger:**
+The secret trigger uses three core JavaScript concepts working together:
+
+**1. addEventListener** — watches for keypresses silently in the background
+```js
+document.addEventListener("keydown", function(e) { ... });
+```
+
+**2. Timestamp array + filter** — checks if 3 presses happened within 2 seconds
+```js
+pressTimes = pressTimes.filter(t => now - t < 2000);
+```
+
+**3. fetch()** — calls the backend endpoint which fires the Twilio SMS
+```js
+await fetch("/send-sos", { method: "POST", body: JSON.stringify({ message: "SOS!" }) });
+```
+
+Full trigger code:
 ```javascript
+let pressTimes = [];
+
 document.addEventListener("keydown", function(e) {
-  if (e.key !== " ") return;
+  if (e.key !== " ") return; // spacebar only
+
   const now = Date.now();
   pressTimes.push(now);
-  pressTimes = pressTimes.filter(t => (now - t) < 2000);
-  if (pressTimes.length >= 3) sendSOS();
-});
-```
+  pressTimes = pressTimes.filter(t => now - t < 2000);
 
-**Mobile — hidden tap zone:**
-```javascript
-// Invisible 60x60px div in top-left corner
-tapZone.addEventListener("touchstart", function(e) {
-  // same timestamp logic as keyboard trigger
-  if (tapTimes.length >= 3) sendSOS();
+  if (pressTimes.length >= 3) {
+    pressTimes = [];
+    sendSOS();
+  }
 });
-```
 
-**GPS + Email:**
-```javascript
 async function sendSOS() {
-  const position = await getLocation();  // GPS coordinates
-  const mapsUrl  = `https://maps.google.com/?q=${lat},${lng}`;
-  await fetch("/send-sos", {             // call backend
-    method: "POST",
-    body: JSON.stringify({ message, timestamp, lat, lng, mapsUrl })
-  });
+  try {
+    await fetch("/send-sos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "SOS triggered! Check on me immediately." })
+    });
+    console.log("SOS sent.");
+  } catch (err) {
+    console.error("Failed to send SOS:", err);
+  }
 }
 ```
 
 ---
 
 ## Project Structure
+
+```
 silent-sos/
-
-├── public/
-
-│   ├── index.html         ← decoy notes app UI
-
-│   ├── css/style.css      ← styling
-
-│   └── js/
-
-│       ├── trigger.js     ← hidden SOS trigger (keyboard + mobile)
-
-│       └── app.js         ← decoy app logic
-
-├── server/
-
-│   ├── server.js          ← Express backend
-
-│   └── email.js           ← Resend email helper
-
-├── config/
-
-│   └── .env               ← credentials (never committed)
-
+├── index.html          ← Frontend UI (decoy screen in Phase 3)
+├── trigger.js          ← Hidden trigger logic
+├── server.js           ← Node.js + Express backend
+├── .env                ← Twilio credentials (never committed)
 ├── .gitignore
-
-└── package.json
+└── README.md
+```
 
 ---
 
@@ -143,73 +124,78 @@ silent-sos/
 
 ### Prerequisites
 - Node.js v18+
-- Free [Resend account](https://resend.com)
+- A free [Twilio account](https://www.twilio.com)
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/choudharyshweta672/Silent-SOS.git
-cd Silent-SOS
+git clone https://github.com/YOUR_USERNAME/silent-sos.git
+cd silent-sos
 ```
 
 ### 2. Install dependencies
 ```bash
-npm install
+npm install express twilio dotenv
 ```
 
-### 3. Add credentials
-Create `config/.env`:
-RESEND_API_KEY=re_xxxxxxxxxxxx
+### 3. Add your credentials
+Create a `.env` file:
+```
+TWILIO_ACCOUNT_SID=your_account_sid
+TWILIO_AUTH_TOKEN=your_auth_token
+TWILIO_PHONE=+1XXXXXXXXXX
+EMERGENCY_CONTACT=+91XXXXXXXXXX
+```
 
-ALERT_EMAIL=your@email.com
-
-PORT=3000
-
-### 4. Run
+### 4. Run the server
 ```bash
-npm start
+node server.js
 ```
 
-Open `http://localhost:3000` → press spacebar 3 times!
+### 5. Open the app
+Go to `http://localhost:3000` and press **spacebar 3 times within 2 seconds**.
 
 ---
 
-## Ethical Design Decisions
+## Ethical & Legal Design Decisions
+
+This project was built with responsible design as a core requirement:
 
 | Principle | Implementation |
 |---|---|
-| Consent | User sets up the app and chooses their trusted contact |
-| No passive surveillance | GPS only captured on trigger, never passively |
-| Data minimisation | No data stored — alert sent and forgotten |
-| Open source | Full code visible — no hidden behaviour |
+| Consent | User sets up the app themselves and chooses their trusted contact |
+| No passive surveillance | Audio/video only captured on trigger (Phase 3), never passively |
+| Data minimisation | Phase 1 sends only a text message, no personal data stored |
+| Transparency | Full source code open — no hidden behaviour |
+
+> These decisions are documented because safety-tech must be ethical by design, not as an afterthought.
 
 ---
 
 ## Roadmap
 
-- [x] **Phase 1** — Hidden trigger + SMS alert
-- [x] **Phase 2** — Live GPS location + email alert + mobile trigger + deployed live
-- [ ] **Phase 3** — Background audio capture + decoy UI upgrade
+- [x] **Phase 1** — Secret trigger + SMS alert (complete)
+- [ ] **Phase 2** — Live GPS location sent with alert
+- [ ] **Phase 3** — Background audio capture + decoy UI
 - [ ] **Phase 4** — Cloud evidence vault + trusted contacts dashboard
 
 ---
 
-## What I Learned
+## What I Learned Building This
 
-- JavaScript event handling (`keydown`, `touchstart`)
+- JavaScript event handling (`addEventListener`, `keydown` events)
 - Timestamp-based detection windows using `Date.now()` and `Array.filter()`
-- Browser Geolocation API and wrapping callbacks in Promises
 - Async API calls with `fetch()` and `async/await`
-- Building REST APIs with Node.js and Express
-- Third-party API integration (Resend)
-- Debugging deployment issues (SMTP blocking, env variables, port binding)
-- Git workflow — commits, push, resolving conflicts
+- Building a REST API with Node.js and Express
+- Third-party API integration (Twilio)
+- Thinking about edge cases: what if the trigger misfires? What if the network is down?
 
 ---
 
 ## Author
 
-**Shweta Choudhary** — B.Tech CSE
-- GitHub: [@choudharyshweta672](https://github.com/choudharyshweta672)
+**Your Name** — B.Tech CSE, [Your College]
+- GitHub: [@yourusername](https://github.com/yourusername)
+- LinkedIn: [linkedin.com/in/yourprofile](https://linkedin.com/in/yourprofile)
 
 ---
 

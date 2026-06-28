@@ -160,3 +160,40 @@ function showSOSOverlay() {
   const overlay = document.getElementById("sos-overlay");
   if (overlay) overlay.classList.add("show");
 }
+// =============================================
+//   MOBILE TRIGGER — tap hidden area 3x fast
+//   Works on phones where keyboard doesn't fire
+// =============================================
+(function() {
+  // Create invisible tap zone — top left corner
+  const tapZone = document.createElement("div");
+  tapZone.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 60px;
+    z-index: 9999;
+    opacity: 0;
+    cursor: default;
+  `;
+  document.body.appendChild(tapZone);
+
+  let tapTimes = [];
+
+  tapZone.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+    if (sosFired) return;
+
+    const now = Date.now();
+    tapTimes.push(now);
+    tapTimes = tapTimes.filter(t => (now - t) < TIME_WINDOW_MS);
+
+    if (tapTimes.length >= REQUIRED_COUNT) {
+      tapTimes = [];
+      sosFired  = true;
+      sendSOS();
+      setTimeout(function() { sosFired = false; }, COOLDOWN_MS);
+    }
+  });
+})();
